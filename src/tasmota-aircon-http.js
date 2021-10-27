@@ -19,7 +19,7 @@ class TasmotaAirconHTTP {
   }
 
   setFanSpeed(val) {
-    this.state.fan_speed = val;
+    this.state.fan_speed = val; // {0..100}
     return this.sendState();
   }
 
@@ -48,7 +48,7 @@ class TasmotaAirconHTTP {
       beep: config.beep || false,
       clean: false,
       econo: false,
-      fan_speed: 100, // {0...100}
+      fan_speed: 100, // {0..100}
       filter: false,
       light: config.light || false,
       mode: 'Hot',
@@ -59,7 +59,7 @@ class TasmotaAirconHTTP {
       sleep: -1,
       swing_horizontal: false,
       swing_vertical: false,
-      temp: 20,
+      temperature: 20,
       temperature_unit: 'C', // C or F
       turbo: false,
       vendor: config.vendor || 'DAIKIN',
@@ -67,7 +67,7 @@ class TasmotaAirconHTTP {
   }
 
   _normalizeFanSpeed(speed) {
-    return Math.ceil(this.fanSteps * speed / 100);
+    return Math.ceil(this.fanSteps * speed / 100) || 1; // Should never be zero, which means off
   }
 
   _normalizeOnOff(power) {

@@ -2,6 +2,7 @@ const TasmotaAirconHTTP = require('./src/tasmota-aircon-http.js');
 
 class HomeBridgeTasmotaAirconHTTP {
   constructor(log, config, api) {
+    this.name = config.name;
     this.driver = new TasmotaAirconHTTP(config);
     this.log = log;
     this.log.info('TasmotaAirconHTTP Accessory Plugin Loaded');
@@ -10,11 +11,16 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   getServices() {
-    return [this.heaterCoolerService, this.informationService];
+    return [this.informationService, this.heaterCoolerService];
+  }
+
+  _proxy(method, args) {
+    this.log.info(method + ' ' + JSON.stringify(args));
+    this.driver[method](args);
   }
 
   _setupHeaterCoolorService({Characteristic, Service}) {
-    const service = new Service(Service.HeaterCooler);
+    const service = new Service.HeaterCooler(this.name);
 
     const modes = {
       Automatic: Characteristic.CurrentHeaterCoolerState.IDLE,
@@ -29,12 +35,18 @@ class HomeBridgeTasmotaAirconHTTP {
       .onGet(() => this.driver.state.on ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE)
       .onSet(val => this._proxy('setOn', val == Characteristic.Active.ACTIVE));
 
+    service.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+      .onGet(() => this.driver.state.temperature)
+      .onSet(val => this._proxy('setTemperature', val));
+
     service.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
-      .onGet(() => modes[this.driver.state.mode] || Characteristic.CurrentHeaterCoolerState.IDLE)
-      .onSet(val => this._proxy('setMode', modes[val]));
+      .onGet(() => modes[this.driver.state.mode] || Characteristic.CurrentHeaterCoolerState.IDLE);
 
     service.getCharacteristic(Characteristic.CurrentTemperature)
-      .onGet(() => this.driver.state.temerature)
+      .onGet(() => this.driver.state.temperature);
+
+    service.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+      .onGet(() => this.driver.state.temperature)
       .onSet(val => this._proxy('setTemperature', val));
 
     service.getCharacteristic(Characteristic.RotationSpeed)
@@ -45,25 +57,18 @@ class HomeBridgeTasmotaAirconHTTP {
       .onGet(() => this.driver.state.swing_vertical ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED)
       .onSet(val => this._proxy('setFanSwing', val == Characteristic.SwingMode.SWING_ENABLED));
 
-    service.setCharacteristic(
-      Characteristic.TemperatureDisplayUnits,
-      this.driver.state.temperature_unit == 'F'
-        ? Characteristic.TemperatureDisplayUnits.FAHRENHEIT
-        : Characteristic.TemperatureDisplayUnits.CELSIUS
-    );
+    service.getCharacteristic(Characteristic.TargetHeaterCoolerState)
+      .onGet(() => modes[this.driver.state.mode] || Characteristic.CurrentHeaterCoolerState.AUTO)
+      .onSet(val => this._proxy('setMode', modes[val]));
 
     return service;
-  }
-
-  _proxy(method, args) {
-    this.log.info('TasmotaAirconHTTP ' + method + ' ' + JSON.stringify(args));
-    this.driver[method](args);
   }
 
   _setupInformationService({Characteristic, Service}) {
     const service = new Service.AccessoryInformation();
     service.setCharacteristic(Characteristic.Manufacturer, this.driver.state.vendor);
-    service.setCharacteristic(Characteristic.Model, this.driver.state.name);
+    service.setCharacteristic(Characteristic.Model, this.name);
+    service.setCharacteristic(Characteristic.SerialNumber, 'S01001');
     return service;
   }
 }

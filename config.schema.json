@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "Tasmota-Aircon-HTTP",
+  "pluginAlias": "TasmotaAirconHTTP",
   "pluginType": "accessory",
   "schema": {
     "type": "object",
