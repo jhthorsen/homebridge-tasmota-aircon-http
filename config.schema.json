@@ -1,0 +1,95 @@
+{
+  "pluginAlias": "Tasmota-Aircon-HTTP",
+  "pluginType": "accessory",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "required": true,
+        "type": "string",
+        "default": "Tasmota Aircon"
+      },
+      "tasmota_uri": {
+        "title": "URI to the Tasmota controller.",
+        "description": "Should be in the format of: http://user:password@192.168.1.104/",
+        "required": true,
+        "type": "string",
+        "format": "uri",
+        "default": "http://192.168.50.104"
+      },
+      "vendor": {
+        "title": "Remote control / Aircon vendor",
+        "type": "string",
+        "default": "DAIKON",
+        "oneOf": [
+          {"title":"AIRWELL", "enum":["AIRWELL"]},
+          {"title":"AMCOR", "enum":["AMCOR"]},
+          {"title":"ARGO", "enum":["ARGO"]},
+          {"title":"CARRIER_AC64", "enum":["CARRIER_AC64"]},
+          {"title":"COOLIX", "enum":["COOLIX"]},
+          {"title":"CORONA_AC", "enum":["CORONA_AC"]},
+          {"title":"DAIKIN", "enum":["DAIKIN"]},
+          {"title":"DAIKIN128", "enum":["DAIKIN128"]},
+          {"title":"DAIKIN152", "enum":["DAIKIN152"]},
+          {"title":"DAIKIN160", "enum":["DAIKIN160"]},
+          {"title":"DAIKIN176", "enum":["DAIKIN176"]},
+          {"title":"DAIKIN2", "enum":["DAIKIN2"]},
+          {"title":"DAIKIN216", "enum":["DAIKIN216"]},
+          {"title":"DAIKIN64", "enum":["DAIKIN64"]},
+          {"title":"DELONGHI_AC", "enum":["DELONGHI_AC"]},
+          {"title":"ECOCLIM", "enum":["ECOCLIM"]},
+          {"title":"ELECTRA_AC", "enum":["ELECTRA_AC"]},
+          {"title":"FUJITSU_AC", "enum":["FUJITSU_AC"]},
+          {"title":"GOODWEATHER", "enum":["GOODWEATHER"]},
+          {"title":"GREE", "enum":["GREE"]},
+          {"title":"HAIER_AC", "enum":["HAIER_AC"]},
+          {"title":"HAIER_AC176", "enum":["HAIER_AC176"]},
+          {"title":"HAIER_AC_YRW02", "enum":["HAIER_AC_YRW02"]},
+          {"title":"HITACHI_AC", "enum":["HITACHI_AC"]},
+          {"title":"HITACHI_AC1", "enum":["HITACHI_AC1"]},
+          {"title":"HITACHI_AC344", "enum":["HITACHI_AC344"]},
+          {"title":"HITACHI_AC424", "enum":["HITACHI_AC424"]},
+          {"title":"KELON", "enum":["KELON"]},
+          {"title":"KELVINATOR", "enum":["KELVINATOR"]},
+          {"title":"LG", "enum":["LG"]},
+          {"title":"LG2", "enum":["LG2"]},
+          {"title":"MIDEA", "enum":["MIDEA"]},
+          {"title":"MITSUBISHI112", "enum":["MITSUBISHI112"]},
+          {"title":"MITSUBISHI136", "enum":["MITSUBISHI136"]},
+          {"title":"MITSUBISHI_AC", "enum":["MITSUBISHI_AC"]},
+          {"title":"MITSUBISHI_HEAVY_152", "enum":["MITSUBISHI_HEAVY_152"]},
+          {"title":"MITSUBISHI_HEAVY_88", "enum":["MITSUBISHI_HEAVY_88"]},
+          {"title":"NEOCLIMA", "enum":["NEOCLIMA"]},
+          {"title":"PANASONIC_AC", "enum":["PANASONIC_AC"]},
+          {"title":"PANASONIC_AC32", "enum":["PANASONIC_AC32"]},
+          {"title":"SAMSUNG_AC", "enum":["SAMSUNG_AC"]},
+          {"title":"SANYO_AC", "enum":["SANYO_AC"]},
+          {"title":"SANYO_AC88", "enum":["SANYO_AC88"]},
+          {"title":"SHARP_AC", "enum":["SHARP_AC"]},
+          {"title":"TCL112AC", "enum":["TCL112AC"]},
+          {"title":"TECHNIBEL_AC", "enum":["TECHNIBEL_AC"]},
+          {"title":"TECO", "enum":["TECO"]},
+          {"title":"TOSHIBA_AC", "enum":["TOSHIBA_AC"]},
+          {"title":"TRANSCOLD", "enum":["TRANSCOLD"]},
+          {"title":"TROTEC", "enum":["TROTEC"]},
+          {"title":"TROTEC_3550", "enum":["TROTEC_3550"]},
+          {"title":"TRUMA", "enum":["TRUMA"]},
+          {"title":"VESTEL_AC", "enum":["VESTEL_AC"]},
+          {"title":"VOLTAS", "enum":["VOLTAS"]},
+          {"title":"WHIRLPOOL_AC", "enum":["WHIRLPOOL_AC"]}
+        ]
+      },
+      "beep": {
+        "title": "Beep",
+        "type": "boolean",
+        "default": true
+      },
+      "light": {
+        "title": "Light",
+        "type": "boolean",
+        "default": true
+      }
+    }
+  }
+}
