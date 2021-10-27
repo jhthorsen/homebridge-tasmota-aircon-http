@@ -8,9 +8,10 @@ export default class TasmotaAirconHTTP {
   }
 
   sendState() {
+    const state = this._normalizeState();
     const url = new URL(this.tasmota_uri.toString());
     url.pathname = '/cm';
-    url.searchParams.set('cmnd', JSON.stringify(this._normalizeState()));
+    url.searchParams.set('cmnd', 'IRhvac ' + JSON.stringify(state));
 
     return new Promise((resolve, reject) => {
       superagent.get(url.toString()).end((err, res) => err ? reject(err) : resolve(res));
@@ -92,7 +93,7 @@ export default class TasmotaAirconHTTP {
       SwingV: this._normalizeOnOff(state.swing_vertical),
       Temp: state.temperature,
       Turbo: this._normalizeOnOff(state.turbo),
-      Vendor: state.vendor;
+      Vendor: state.vendor,
     };
   }
 }
