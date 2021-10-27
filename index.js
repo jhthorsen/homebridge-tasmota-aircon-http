@@ -1,5 +1,4 @@
-import pkg from './package.json';
-import TasmotaAirconHTTP from './src/tasmota-aircon-http.js'
+const TasmotaAirconHTTP = require('./src/tasmota-aircon-http.js');
 
 class HomeBridgeTasmotaAirconHTTP {
   constructor(log, config, api) {
@@ -69,6 +68,6 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 }
 
-export default (api) => {
-  api.registerAccessory(pkg.name, HomeBridgeTasmotaAirconHTTP);
+module.exports = (api) => {
+  api.registerAccessory('TasmotaAirconHTTP', HomeBridgeTasmotaAirconHTTP);
 };

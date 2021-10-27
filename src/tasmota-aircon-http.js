@@ -1,6 +1,6 @@
-import superagent from 'superagent';
+const superagent = require('superagent');
 
-export default class TasmotaAirconHTTP {
+class TasmotaAirconHTTP {
   constructor(config) {
     this.fanSteps = 5;
     this.state = this._configToState(config);
@@ -97,3 +97,5 @@ export default class TasmotaAirconHTTP {
     };
   }
 }
+
+module.exports = TasmotaAirconHTTP;

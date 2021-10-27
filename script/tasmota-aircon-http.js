@@ -1,5 +1,5 @@
-import Plugin from '../index.js';
-import TasmotaAirconHTTP from '../src/tasmota-aircon-http.js';
+const Plugin = require('../index.js');
+const TasmotaAirconHTTP = require('../src/tasmota-aircon-http.js');
 
 function main(argv) {
   const t = new TasmotaAirconHTTP({});
