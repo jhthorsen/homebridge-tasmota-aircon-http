@@ -1,0 +1,31 @@
+{
+  "name": "homebridge-tasmota-aircon-http",
+  "version": "2021.0.1",
+  "description": "Tasmota Aircon plugin for Homebridge: https://github.com/jhthorsen/homebridge-tasmota-aircon-http",
+  "homepage": "https://github.com/jhthorsen/homebridge-tasmota-aircon-http#readme",
+  "license": "MIT",
+  "author": "Jan Henning Thorsen",
+  "contributors": [],
+  "main": "index.js",
+  "engines": {
+    "node": ">=12.22.1",
+    "homebridge": ">=1.3.0"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "daikin",
+    "tasmota"
+  ],
+  "bugs": {
+    "url": "https://github.com/jhthorsen/homebridge-tasmota-aircon-http/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhthorsen/homebridge-tasmota-aircon-http.git"
+  },
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "homebridge": "^1.3.5"
+  }
+}
