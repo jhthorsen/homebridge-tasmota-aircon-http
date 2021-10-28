@@ -1,78 +1,221 @@
-const TasmotaAirconHTTP = require('./src/tasmota-aircon-http.js');
+const debounce = require('debounce');
+const pkg = require('./package.json');
+const superagent = require('superagent');
 
+/**
+ * HomeBridgeTasmotaAirconHTTP will listen for accessory changes in HomeKit and send
+ * the new state to a Tasmota powered IR device over HTTP.
+ *
+ * @module HomeBridgeTasmotaAirconHTTP
+ */
 class HomeBridgeTasmotaAirconHTTP {
-  constructor(log, config, api) {
-    this.name = config.name;
-    this.driver = new TasmotaAirconHTTP(config);
+
+  /**
+   * HomeBridgeTasmotaAirconHTTP constructor
+   *
+   * @param {Object} log A log object provided by Homebridge
+   * @param {Object} config Config from Homebridge Plugin Settings GUI
+   * @param {Homebrige} api A homebridge object
+   */
+  constructor(log = console, config = {}, api = {}) {
+    this.name = config.name || 'HomeBridgeTasmotaAirconHTTP';
+    this.identity = '';
     this.log = log;
-    this.log.info('TasmotaAirconHTTP Accessory Plugin Loaded');
-    this.heaterCoolerService = this._setupHeaterCoolorService(api.hap);
-    this.informationService = this._setupInformationService(api.hap);
+    this.sendStateToTasmotaLater = debounce(() => this.sendStateToTasmota(), 1000);
+    this.superagent = superagent; // TODO: Is superagent needed?
+
+    this.fanSteps = config.fanSteps || 5; // Used to translate {0..100} to {1..fanSteps}
+    this.state = this._initialState(config);
+    this.tasmotaBaseUrl = config.tasmota_uri || new URL('http://192.168.50.4/');
+
+    // api.hap does not exist if called from "npm run cmd"
+    if (api.hap) {
+      this.heaterCoolerService = this._setupHeaterCoolorService(api.hap);
+      this.informationService = this._setupInformationService(api.hap);
+    }
   }
 
+  /**
+   * Called by Homebridge to get the available services
+   *
+   * @return {Array} A list of services.
+   */
   getServices() {
     return [this.informationService, this.heaterCoolerService];
   }
 
-  _proxy(method, args) {
-    this.log.info(method + ' ' + JSON.stringify(args));
-    this.driver[method](args);
+  /**
+   * Will serialize the current state and send it to the Tasmota device,
+   * using HTTP.
+   *
+   * @param {Function} Will be called with (err, res) from the request
+   */
+  sendStateToTasmota(cb) {
+    const url = new URL(this.tasmotaBaseUrl.toString());
+    url.pathname = '/cm';
+    url.searchParams.set('cmnd', 'IRhvac ' + JSON.stringify(this._stateToTasmotaState()));
+
+    if (!cb) cb = (err, res) => err ? this.log.error(err) : this.log.debug(res.body);
+    this.superagent.get(url.toString()).end(cb);
+  }
+
+  /**
+   * This method is used to alter the state. This method will also
+   * call sendStateToTasmota() at some time in the future.
+   *
+   * @example
+   * plugin.set({
+   *   fanSpeed,      // {0..100}
+   *   mode,          // {auto, cool, heat}
+   *   power,         // {false, true}
+   *   swingVertical, // {false, true}
+   *   temperature,   // {-270,100}
+   * });
+   *
+   * @param {Object} params Key/value pairs of what to change
+   */
+  set(params) {
+    this.log.info('Set ' + JSON.stringify(params));
+    Object.keys(params).forEach(k => (this.state[k] = params[k]));
+    this.sendStateToTasmotaLater();
+  }
+
+  _characteristicActive({Characteristic}, val) {
+    if (arguments.length == 2) this.set({power: val === Characteristic.Active.ACTIVE});
+    return this.state.power ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE;
+  }
+
+  _characteristicCurrentHeaterCoolerState({Characteristic}) {
+    if (!this.state.power) return Characteristic.CurrentHeaterCoolerState.INACTIVE;
+    if (this.state.mode == 'cool') return Characteristic.CurrentHeaterCoolerState.COOLING;
+    if (this.state.mode == 'heat') return Characteristic.CurrentHeaterCoolerState.HEATING;
+    return Characteristic.CurrentHeaterCoolerState.IDLE;
+  }
+
+  _characteristicCoolingThresholdTemperature({Characteristic}, temperature) {
+    if (arguments.length == 2) this.set({temperature});
+    return this.state.temperature;
+  }
+
+  _characteristicCurrentTemperature(...args) {
+    return this._characteristicCoolingThresholdTemperature(...args);
+  }
+
+  _characteristicHeatingThresholdTemperature(...args) {
+    return this._characteristicCoolingThresholdTemperature(...args);
+  }
+
+  _characteristicRotationSpeed({Characteristic}, fanSpeed) {
+    if (arguments.length == 2) this.set({fanSpeed});
+    return this.state.fanSpeed;
+  }
+
+  _characteristicSwingMode({Characteristic}, val) {
+    if (arguments.length == 2) this.set({swingVertical: val === Characteristic.SwingMode.SWING_ENABLED});
+    return this.state.swingVertical ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED;
+  }
+
+  _characteristicTargetHeaterCoolerState({Characteristic}, val) {
+    if (arguments.length == 2) {
+      this.set({
+        mode: val == Characteristic.TargetHeaterCoolerState.COOL ? 'cool'
+            : val == Characteristic.TargetHeaterCoolerState.HEAT ? 'heat'
+            :                                                      'auto'
+      });
+    }
+
+    const state = this.state.mode.toUpperCase(); // auto, heat, cool
+    return Characteristic.TargetHeaterCoolerState[state];
+  }
+
+  _initialState(config) {
+    return {
+      // Static (for now)
+      clean: false,
+      econo: false,
+      filter: false,
+      model: -1,
+      quiet: false,
+      sleep: -1,
+      swingHorizontal: false,
+      turbo: false,
+
+      // Editable from Homebridge Plugin Settings GUI
+      beep: config.beep || false,
+      light: config.light || false,
+      name: config.name || 'DAIKIN',
+      vendor: config.vendor || 'DAIKIN',
+
+      // Get and (maybe) set by service
+      fanSpeed: 50, // {0..100}
+      mode: 'auto',
+      power: false,
+      swingVertical: false,
+      temperature: 20,
+      temperatureUnit: config.temperature_unit || 'C', // C or F
+    };
   }
 
   _setupHeaterCoolorService({Characteristic, Service}) {
     const service = new Service.HeaterCooler(this.name);
 
-    const modes = {
-      Automatic: Characteristic.CurrentHeaterCoolerState.IDLE,
-      Cooling: Characteristic.CurrentHeaterCoolerState.COOLING,
-      Fanonly: Characteristic.CurrentHeaterCoolerState.INACTIVE,
-      Heating: Characteristic.CurrentHeaterCoolerState.HEATING,
-    };
-
-    Object.keys(modes).forEach(k => { modes[modes[k]] = k });
-
-    service.getCharacteristic(Characteristic.Active)
-      .onGet(() => this.driver.state.on ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE)
-      .onSet(val => this._proxy('setOn', val == Characteristic.Active.ACTIVE));
-
-    service.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-      .onGet(() => this.driver.state.temperature)
-      .onSet(val => this._proxy('setTemperature', val));
-
-    service.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
-      .onGet(() => modes[this.driver.state.mode] || Characteristic.CurrentHeaterCoolerState.IDLE);
-
-    service.getCharacteristic(Characteristic.CurrentTemperature)
-      .onGet(() => this.driver.state.temperature);
-
-    service.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-      .onGet(() => this.driver.state.temperature)
-      .onSet(val => this._proxy('setTemperature', val));
-
-    service.getCharacteristic(Characteristic.RotationSpeed)
-      .onGet(() => this.driver.state.fan_speed)
-      .onSet(val => this._proxy('setFanSpeed', val));
-
-    service.getCharacteristic(Characteristic.SwingMode)
-      .onGet(() => this.driver.state.swing_vertical ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED)
-      .onSet(val => this._proxy('setFanSwing', val == Characteristic.SwingMode.SWING_ENABLED));
-
-    service.getCharacteristic(Characteristic.TargetHeaterCoolerState)
-      .onGet(() => modes[this.driver.state.mode] || Characteristic.CurrentHeaterCoolerState.AUTO)
-      .onSet(val => this._proxy('setMode', modes[val]));
+    [
+      ['ro', 'CurrentHeaterCoolerState'],
+      ['ro', 'CurrentTemperature'],
+      ['rw', 'Active'],
+      ['rw', 'CoolingThresholdTemperature'],
+      ['rw', 'HeatingThresholdTemperature'],
+      ['rw', 'RotationSpeed'],
+      ['rw', 'SwingMode'],
+      ['rw', 'TargetHeaterCoolerState'],
+    ].forEach(([rorw, name]) => {
+      const method = '_characteristic' + name;
+      const characteristic = service.getCharacteristic(Characteristic[name]);
+      characteristic.onGet(() => this[method]({Characteristic}))
+      if (rorw == 'rw') characteristic.onSet(val => this[method]({Characteristic}, val));
+    });
 
     return service;
   }
 
   _setupInformationService({Characteristic, Service}) {
     const service = new Service.AccessoryInformation();
-    service.setCharacteristic(Characteristic.Manufacturer, this.driver.state.vendor);
-    service.setCharacteristic(Characteristic.Model, this.name);
-    service.setCharacteristic(Characteristic.SerialNumber, 'S01001');
+    service.getCharacteristic(Characteristic.FirmwareRevision).onGet(() => pkg.version);
+    service.getCharacteristic(Characteristic.Identify).onSet(val => this.log.info('Identity ' + (this.identity = val)));
+    service.getCharacteristic(Characteristic.Manufacturer).onGet(() => 'TasmotaAirconHTTP');
+    service.getCharacteristic(Characteristic.Model).onGet(() => this.state.model);
+    service.getCharacteristic(Characteristic.Name).onGet(() => this.name);
+    service.getCharacteristic(Characteristic.SerialNumber).onGet(() => 'S01');
     return service;
+  }
+
+  _stateToTasmotaState() {
+    const state = this.state;
+    const normalizeOnOff = (val) => val === false ? 'Off' : 'On';
+    const ucfirst = (str) => str.substring(0, 1).toUpperCase() + str.substring(1);
+
+    return {
+      Beep: normalizeOnOff(state.beep),
+      Celsius: normalizeOnOff(state.temperatureUnit != 'F'),
+      Clean: normalizeOnOff(state.clean),
+      Econo: normalizeOnOff(state.econo),
+      FanSpeed: String(Math.ceil(this.fanSteps * state.fanSpeed / 100) || 1), // Should never be zero, because it would mean "Off"
+      Filter: normalizeOnOff(state.filter),
+      Light: normalizeOnOff(state.light),
+      Mode: ucfirst(state.mode),
+      Model: state.model,
+      Power: normalizeOnOff(state.power),
+      Quiet: normalizeOnOff(state.quiet),
+      Sleep: state.sleep,
+      SwingH: normalizeOnOff(state.swingHorizontal),
+      SwingV: normalizeOnOff(state.swingVertical),
+      Temp: state.temperature,
+      Turbo: normalizeOnOff(state.turbo),
+      Vendor: state.vendor,
+    };
   }
 }
 
 module.exports = (api) => {
-  api.registerAccessory('TasmotaAirconHTTP', HomeBridgeTasmotaAirconHTTP);
+  return !api ? HomeBridgeTasmotaAirconHTTP : api.registerAccessory('TasmotaAirconHTTP', HomeBridgeTasmotaAirconHTTP)
 };

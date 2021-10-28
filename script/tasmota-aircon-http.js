@@ -1,21 +1,23 @@
-const Plugin = require('../index.js');
-const TasmotaAirconHTTP = require('../src/tasmota-aircon-http.js');
+const HomeBridgeTasmotaAirconHTTP = require('../index.js')();
 
 function main(argv) {
-  const t = new TasmotaAirconHTTP({});
+  const config = {};
+  config.tasmota_uri = new URL(process.env.TASMOTA_AIRCON_HTTP_BASE_URL || 'http://192.168.50.4');
 
-  // TODO: Need to write some tests
-  console.debug('index.js ' + (typeof Plugin == 'function' ? 'compiles.' : 'does not compile correctly.'));
+  const plugin = new HomeBridgeTasmotaAirconHTTP(console, config);
 
-  const method = argv[2] || 'setOn';
-  const input
-    = argv.length <= 3   ? true
-    : argv[3] == 'false' ? false
-    : argv[3] == 'true'  ? true
-    : argv[3];
+  if (argv % 2 == 0) {
+    while (argv.length) {
+      const [key, val] = [argv.shift(), argv.shift()];
+      plugin.set(key,
+          val == 'false'      ? false
+        : val == 'true'       ? true
+        : val.match(/^-?\d+/) ? parseFloat(val)
+        : val);
+    }
+  }
 
-  t[method](input).then(res => console.info(res.body || res.text || res.status))
-      .catch(err => console.error(err));
+  plugin.sendStateToTasmota();
 }
 
-main(process.argv);
+main([...process.argv]);
