@@ -24,12 +24,15 @@
     "url": "git+https://github.com/jhthorsen/homebridge-tasmota-aircon-http.git"
   },
   "scripts": {
-    "cmd": "node ./script/tasmota-aircon-http.js"
+    "cmd": "node ./script/tasmota-aircon-http.js",
+    "test": "tap --no-coverage test/*.js"
   },
   "dependencies": {
+    "debounce": "^1.2.1",
     "superagent": "^6.1.0"
   },
   "devDependencies": {
-    "homebridge": "^1.3.5"
+    "homebridge": "^1.3.5",
+    "tap": "^15.0.10"
   }
 }
