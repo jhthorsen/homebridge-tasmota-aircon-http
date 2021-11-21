@@ -19,25 +19,25 @@ The IR codes are sent in the [HVAC](https://tasmota.github.io/docs/Commands/#ir-
 format, meaning very little configuration is needed. Here are the parameters sent:
 
 * Variables from Homekit
- * FanSpeed - [RotationSpeed](https://developers.homebridge.io/#/characteristic/RotationSpeed)
- * Mode - [TargetHeaterCoolerState](https://developers.homebridge.io/#/characteristic/TargetHeaterCoolerState)
- * Power - [Active](https://developers.homebridge.io/#/characteristic/Active)
- * SwingV - [SwingMode](https://developers.homebridge.io/#/characteristic/SwingMode)
- * Temp - [CoolingThresholdTemperature](https://developers.homebridge.io/#/characteristic/CoolingThresholdTemperature) and [HeatingThresholdTemperature](https://developers.homebridge.io/#/characteristic/HeatingThresholdTemperature)
+  * FanSpeed - [RotationSpeed](https://developers.homebridge.io/#/characteristic/RotationSpeed)
+  * Mode - [TargetHeaterCoolerState](https://developers.homebridge.io/#/characteristic/TargetHeaterCoolerState)
+  * Power - [Active](https://developers.homebridge.io/#/characteristic/Active)
+  * SwingV - [SwingMode](https://developers.homebridge.io/#/characteristic/SwingMode)
+  * Temp - [CoolingThresholdTemperature](https://developers.homebridge.io/#/characteristic/CoolingThresholdTemperature) and [HeatingThresholdTemperature](https://developers.homebridge.io/#/characteristic/HeatingThresholdTemperature)
 * Configuration
- * Beep - true/false
- * Celsius - "C" or "F"
- * Light - true/false
- * Vendor - Daikon, Hitacho, Toshiba, ...
+  * Beep - true/false
+  * Celsius - "C" or "F"
+  * Light - true/false
+  * Vendor - Daikon, Hitacho, Toshiba, ...
 * Currently static
- * Clean - false
- * Econo - false
- * Filter - false
- * Model - "-1"
- * Quiet - false
- * Sleep - "-1"
- * SwingH - false
- * Turbo - false
+  * Clean - false
+  * Econo - false
+  * Filter - false
+  * Model - "-1"
+  * Quiet - false
+  * Sleep - "-1"
+  * SwingH - false
+  * Turbo - false
 
 ## Configuration
 
