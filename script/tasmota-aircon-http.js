@@ -2,7 +2,7 @@ const HomeBridgeTasmotaAirconHTTP = require('../index.js')();
 
 function main(argv) {
   const config = {};
-  config.tasmota_uri = new URL(process.env.TASMOTA_AIRCON_HTTP_BASE_URL || 'http://192.168.50.4');
+  config.tasmota_url = new URL(process.env.TASMOTA_AIRCON_HTTP_BASE_URL || 'http://192.168.50.4');
 
   const plugin = new HomeBridgeTasmotaAirconHTTP(console, config);
 

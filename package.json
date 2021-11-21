@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tasmota-aircon-http",
-  "version": "2021.0.1",
+  "version": "2021.1.0",
   "description": "Tasmota Aircon plugin for Homebridge: https://github.com/jhthorsen/homebridge-tasmota-aircon-http",
   "homepage": "https://github.com/jhthorsen/homebridge-tasmota-aircon-http#readme",
   "license": "MIT",

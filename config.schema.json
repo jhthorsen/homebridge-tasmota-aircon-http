@@ -10,8 +10,8 @@
         "type": "string",
         "default": "Tasmota Aircon"
       },
-      "tasmota_uri": {
-        "title": "URI to the Tasmota controller.",
+      "tasmota_url": {
+        "title": "URL to the Tasmota controller.",
         "description": "Should be in the format of: http://user:password@192.168.1.4/",
         "required": true,
         "type": "string",

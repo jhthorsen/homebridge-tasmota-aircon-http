@@ -26,7 +26,7 @@ class HomeBridgeTasmotaAirconHTTP {
 
     this.fanSteps = config.fanSteps || 5; // Used to translate {0..100} to {1..fanSteps}
     this.state = this._initialState(config);
-    this.tasmotaBaseUrl = config.tasmota_uri || new URL('http://192.168.50.4/');
+    this.tasmotaBaseUrl = config.tasmota_url || config.tasmota_uri ||new URL('http://192.168.50.4/');
 
     // api.hap does not exist if called from "npm run cmd"
     if (api.hap) {
