@@ -57,7 +57,7 @@ aircon with another infrared remote, then the settings will not be updated in Ho
 * [Example hardware](https://www.amazon.com/Rakstore-Infrared-Transceiver-Wireless-Development/dp/B09CM7MFQB)
 * [Tasmota IR firmware](https://ota.tasmota.com/tasmota/release/tasmota-ir.bin.gz)
 * [Homebride API reference](https://developers.homebridge.io/)
-+ [Tasmota IR reference](https://tasmota.github.io/docs/Tasmota-IR/)
+* [Tasmota IR reference](https://tasmota.github.io/docs/Tasmota-IR/)
 
 ## Author
 
