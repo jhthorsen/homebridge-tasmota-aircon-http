@@ -89,6 +89,21 @@
         "title": "Light",
         "type": "boolean",
         "default": true
+      },
+      "turboswitch": {
+        "title": "Turbo Switch",
+        "type": "boolean",
+        "default": false
+      },
+      "econoswitch": {
+        "title": "Eco Switch",
+        "type": "boolean",
+        "default": false
+      },
+      "quietswitch": {
+        "title": "Quiet Switch",
+        "type": "boolean",
+        "default": false
       }
     }
   }
