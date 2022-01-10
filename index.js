@@ -65,6 +65,15 @@ class HomeBridgeTasmotaAirconHTTP {
     if (!cb) cb = (err, res) => err ? this.log.error(err) : this.log.debug(res.body);
     this.superagent.get(url.toString()).end(cb);
   }
+  
+  getTempFromTasmota(cb) {
+    const url = new URL(this.tasmotaBaseUrl.toString());
+    url.pathname = '/cm';
+    url.searchParams.set('cmnd=GlobalTemp');
+
+    if (!cb) cb = (err, res) => err ? this.log.error(err) : this.log.debug(res.body);
+    this.superagent.get(url.toString()).end(cb);
+  }
 
   /**
    * This method is used to alter the state. This method will also
@@ -134,6 +143,7 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   _characteristicCurrentTemperature(...args) {
+    this.getTempFromTasmota();
     return this._characteristicCoolingThresholdTemperature(...args);
   }
 
