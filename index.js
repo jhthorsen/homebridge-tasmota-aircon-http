@@ -134,7 +134,6 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   _characteristicCurrentTemperature(...args) {
-    this.getTempFromTasmota();
     return this._characteristicCoolingThresholdTemperature(...args);
   }
 
