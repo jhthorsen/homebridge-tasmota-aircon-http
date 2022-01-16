@@ -44,10 +44,10 @@ class HomeBridgeTasmotaAirconHTTP {
    * @return {Array} A list of services.
    */
   getServices() {
-    const services = [ this.informationService, this.heaterCoolerService ];
-    if (this.state.turboswitch) services.push( this.switchTurboService );
-    if (this.state.econoswitch) services.push( this.switchEconoService );
-    if (this.state.quietswitch) services.push( this.switchQuietService );
+    const services = [this.informationService, this.heaterCoolerService];
+    if (this.state.econoswitch) services.push(this.switchEconoService);
+    if (this.state.quietswitch) services.push(this.switchQuietService);
+    if (this.state.turboswitch) services.push(this.switchTurboService);
     return services ;
   }
 
@@ -92,35 +92,6 @@ class HomeBridgeTasmotaAirconHTTP {
     return this.state.power ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE;
   }
 
-  _characteristicSwitchTurboActive({Characteristic}, val) {
-    /**const name = this.getCharacteristic(Characteristic.Name).value ;
-    this.log.info('HK On : ' + this.switchTurboService.getCharacteristic(Characteristic.On).value );
-    this.log.info('HK Name : ' + this.switchTurboService.getCharacteristic(Characteristic.Name).value );
-    this.log.info('HK Name 2 : ' + name );
-    this.log.info('Turbo : ' + this.state.turbo ); */
-    if (arguments.length == 2)
-      this.set({turbo: val, econo: false, quiet: false});
-      this.switchEconoService.updateCharacteristic(Characteristic.On, false);
-      this.switchQuietService.updateCharacteristic(Characteristic.On, false);
-    return this.state.turbo ;
-  }
-
-  _characteristicSwitchEconoActive({Characteristic}, val) {
-    if (arguments.length == 2)
-      this.set({turbo: false, econo: val, quiet: false });
-      this.switchTurboService.updateCharacteristic(Characteristic.On, false);
-      this.switchQuietService.updateCharacteristic(Characteristic.On, false);
-    return this.state.econo ;
-  }
-
-  _characteristicSwitchQuietActive({Characteristic}, val) {
-    if (arguments.length == 2)
-      this.set({turbo: false, econo: false, quiet: val });
-      this.switchTurboService.updateCharacteristic(Characteristic.On, false);
-      this.switchEconoService.updateCharacteristic(Characteristic.On, false);
-    return this.state.quiet ;
-  }
-
   _characteristicCurrentHeaterCoolerState({Characteristic}) {
     if (!this.state.power) return Characteristic.CurrentHeaterCoolerState.INACTIVE;
     if (this.state.mode == 'cool') return Characteristic.CurrentHeaterCoolerState.COOLING;
@@ -151,6 +122,33 @@ class HomeBridgeTasmotaAirconHTTP {
     return this.state.swingVertical ? Characteristic.SwingMode.SWING_ENABLED : Characteristic.SwingMode.SWING_DISABLED;
   }
 
+  _characteristicSwitchEconoOn({Characteristic}, val) {
+    if (arguments.length == 2) {
+      this.set({econo: val, quiet: false, turbo: false});
+      this.switchQuietService.updateCharacteristic(Characteristic.On, false);
+      this.switchTurboService.updateCharacteristic(Characteristic.On, false);
+    }
+    return this.state.econo;
+  }
+
+  _characteristicSwitchQuietOn({Characteristic}, val) {
+    if (arguments.length == 2) {
+      this.set({econo: false, quiet: val, turbo: false});
+      this.switchEconoService.updateCharacteristic(Characteristic.On, false);
+      this.switchTurboService.updateCharacteristic(Characteristic.On, false);
+    }
+    return this.state.quiet;
+  }
+
+  _characteristicSwitchTurboOn({Characteristic}, val) {
+    if (arguments.length == 2) {
+      this.set({econo: false, quiet: false, turbo: val});
+      this.switchEconoService.updateCharacteristic(Characteristic.On, false);
+      this.switchQuietService.updateCharacteristic(Characteristic.On, false);
+    }
+    return this.state.turbo;
+  }
+
   _characteristicTargetHeaterCoolerState({Characteristic}, val) {
     if (arguments.length == 2) {
       this.set({
@@ -170,7 +168,7 @@ class HomeBridgeTasmotaAirconHTTP {
       clean: false,
       econo: false,
       filter: false,
-      model: "Tasmota",
+      model: 'Tasmota',
       quiet: false,
       sleep: -1,
       swingHorizontal: false,
@@ -178,11 +176,11 @@ class HomeBridgeTasmotaAirconHTTP {
 
       // Editable from Homebridge Plugin Settings GUI
       beep: config.beep || false,
-      light: config.light || false,
-      turboswitch: config.turboswitch || false,
       econoswitch: config.econoswitch || false,
-      quietswitch: config.quietswitch || false,
+      light: config.light || false,
       name: config.name || 'DAIKIN',
+      quietswitch: config.quietswitch || false,
+      turboswitch: config.turboswitch || false,
       vendor: config.vendor || 'DAIKIN',
 
       // Get and (maybe) set by service
@@ -228,18 +226,9 @@ class HomeBridgeTasmotaAirconHTTP {
     return service;
   }
 
-  _setupSwitchTurboService({Characteristic, Service}) {
-    const service = new Service.Switch('Turbo', 'turbo');
-    const method = '_characteristicSwitchTurboActive' ;
-    const characteristic = service.getCharacteristic(Characteristic['On']);
-    characteristic.onGet(() => this[method]({Characteristic}));
-    characteristic.onSet(val => this[method]({Characteristic}, val));
-    return service;
-  }
-
   _setupSwitchEconoService({Characteristic, Service}) {
-    const service = new Service.Switch('Eco', 'eco');
-    const method = '_characteristicSwitchEconoActive' ;
+    const service = new Service.Switch('Econo', 'econo');
+    const method = '_characteristicSwitchEconoOn' ;
     const characteristic = service.getCharacteristic(Characteristic['On']);
     characteristic.onGet(() => this[method]({Characteristic}));
     characteristic.onSet(val => this[method]({Characteristic}, val));
@@ -248,7 +237,16 @@ class HomeBridgeTasmotaAirconHTTP {
 
   _setupSwitchQuietService({Characteristic, Service}) {
     const service = new Service.Switch('Quiet', 'quiet');
-    const method = '_characteristicSwitchQuietActive' ;
+    const method = '_characteristicSwitchQuietOn' ;
+    const characteristic = service.getCharacteristic(Characteristic['On']);
+    characteristic.onGet(() => this[method]({Characteristic}));
+    characteristic.onSet(val => this[method]({Characteristic}, val));
+    return service;
+  }
+
+  _setupSwitchTurboService({Characteristic, Service}) {
+    const service = new Service.Switch('Turbo', 'turbo');
+    const method = '_characteristicSwitchTurboOn' ;
     const characteristic = service.getCharacteristic(Characteristic['On']);
     characteristic.onGet(() => this[method]({Characteristic}));
     characteristic.onSet(val => this[method]({Characteristic}, val));
