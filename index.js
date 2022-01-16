@@ -123,8 +123,10 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   _characteristicSwitchEconoOn({Characteristic}, val) {
-    if (arguments.length == 2) {
-      this.set({econo: val, quiet: false, turbo: false});
+    if (arguments.length == 2 && !val) {
+      this.set({econo: false});
+    } else if (arguments.length == 2 && val) {
+      this.set({econo: true, quiet: false, turbo: false});
       this.switchQuietService.updateCharacteristic(Characteristic.On, false);
       this.switchTurboService.updateCharacteristic(Characteristic.On, false);
     }
@@ -132,8 +134,10 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   _characteristicSwitchQuietOn({Characteristic}, val) {
-    if (arguments.length == 2) {
-      this.set({econo: false, quiet: val, turbo: false});
+    if (arguments.length == 2 && !val) {
+      this.set({quiet: false});
+    } else if (arguments.length == 2 && val) {
+      this.set({econo: false, quiet: true, turbo: false});
       this.switchEconoService.updateCharacteristic(Characteristic.On, false);
       this.switchTurboService.updateCharacteristic(Characteristic.On, false);
     }
@@ -141,8 +145,10 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   _characteristicSwitchTurboOn({Characteristic}, val) {
-    if (arguments.length == 2) {
-      this.set({econo: false, quiet: false, turbo: val});
+    if (arguments.length == 2 && !val) {
+      this.set({turbo: false});
+    } else if (arguments.length == 2 && val) {
+      this.set({econo: false, quiet: false, turbo: true});
       this.switchEconoService.updateCharacteristic(Characteristic.On, false);
       this.switchQuietService.updateCharacteristic(Characteristic.On, false);
     }
