@@ -89,6 +89,21 @@
         "title": "Light",
         "type": "boolean",
         "default": true
+      },
+      "econoswitch": {
+        "title": "Enable Econo Switch Homekit service",
+        "type": "boolean",
+        "default": false
+      },
+      "quietswitch": {
+        "title": "Enable Quiet Switch Homekit service",
+        "type": "boolean",
+        "default": false
+      },
+      "turboswitch": {
+        "title": "Enable Turbo Switch Homekit service",
+        "type": "boolean",
+        "default": false
       }
     }
   }
