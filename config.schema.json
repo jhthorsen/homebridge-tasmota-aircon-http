@@ -21,6 +21,7 @@
       "vendor": {
         "title": "Remote control / Aircon vendor",
         "type": "string",
+        "required": true,
         "default": "DAIKON",
         "oneOf": [
           {"title":"AIRWELL", "enum":["AIRWELL"]},
@@ -104,6 +105,17 @@
         "title": "Enable Turbo Switch Homekit service",
         "type": "boolean",
         "default": false
+      },
+      "fanautospeed": {
+        "title": "Enable the auto speed for Fan",
+        "type": "string",
+        "required": true,
+        "default": "disabled",
+        "oneOf": [
+          {"title":"Disabled", "enum":["disabled"]},
+          {"title":"Set auto when fan is at low level", "enum":["low"]},
+          {"title":"Set auto whathever fan speed", "enum":["force"]}
+        ]
       }
     }
   }
