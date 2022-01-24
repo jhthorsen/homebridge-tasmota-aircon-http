@@ -195,6 +195,19 @@ t.test('characteristic', t => {
     t.end();
   });
 
+  t.test('_valueOfFanForTasmota', t =>{
+    t.equal(p._valueOfFanForTasmota(1, 5, 'low'), 'auto');
+    t.equal(p._valueOfFanForTasmota(50, 5, 'low'), '2');
+    t.equal(p._valueOfFanForTasmota(100, 5, 'low'), '5');
+    t.equal(p._valueOfFanForTasmota(1, 5, 'force'), 'auto');
+    t.equal(p._valueOfFanForTasmota(50, 5, 'force'), 'auto');
+    t.equal(p._valueOfFanForTasmota(100, 5, 'force'), 'auto');
+    t.equal(p._valueOfFanForTasmota(1, 5, 'disable'), '1');
+    t.equal(p._valueOfFanForTasmota(50, 5, 'disable'), '3');
+    t.equal(p._valueOfFanForTasmota(100, 5, 'disable'), '5');
+    t.end();
+  });
+
   t.end();
 });
 
