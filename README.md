@@ -46,6 +46,10 @@ format, meaning very little configuration is needed. Here are the parameters sen
 * Remote control / Aircon vendor (```vendor```) - The vendor. Ex Daikon, Hitacho, Toshiba, ...
 * Beep (```beep```) - Enable "beep" in the HVAC IR code.
 * Light (```light```) - Enable "light" in the HVAC IR code.
+* Enable Econo Switch Homekit service (```econoswitch```) - Display a switch that will control the _Eco_ mode of AC
+* Enable Quiet Switch Homekit service (```quietswitch```) - Display a switch that will control the _Quiet_ mode of AC
+* Enable Turbo Switch Homekit service (```turboswitch```) - Display a switch that will control the _Turbo_ mode of AC
+* Enable the auto speed for Fan (```fanatiospeed```) - Set if the plugin should use the speed _auto_ of fan
 
 ## Caveats
 

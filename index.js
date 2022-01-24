@@ -183,7 +183,7 @@ class HomeBridgeTasmotaAirconHTTP {
       // Editable from Homebridge Plugin Settings GUI
       beep: config.beep || false,
       econoswitch: config.econoswitch || false,
-      fanautospeed: config.fanautospeed || 'disabled',
+      fanAutoSpeed: config.fanautospeed || 'disabled',
       light: config.light || false,
       name: config.name || 'DAIKIN',
       quietswitch: config.quietswitch || false,
@@ -270,7 +270,7 @@ class HomeBridgeTasmotaAirconHTTP {
       Celsius: normalizeOnOff(state.temperatureUnit != 'F'),
       Clean: normalizeOnOff(state.clean),
       Econo: normalizeOnOff(state.econo),
-      FanSpeed: this._valueOfFan(),
+      FanSpeed: this._valueOfFanForTasmota(state.fanSpeed, this.fanSteps, state.fanAutoSpeed),
       Filter: normalizeOnOff(state.filter),
       Light: normalizeOnOff(state.light),
       Mode: ucfirst(state.mode),
@@ -286,16 +286,14 @@ class HomeBridgeTasmotaAirconHTTP {
     };
   }
 
-  _valueOfFan() {
-    var fanLevel = '1';
-    if (this.state.fanautospeed == 'disabled') {
-      fanLevel = String(Math.floor(this.fanSteps * this.state.fanSpeed / 101) + 1);
-    } else if (this.state.fanautospeed == 'low') {
-      fanLevel = String(Math.floor((this.fanSteps + 1) * this.state.fanSpeed / 101) || 'auto');
-    } else if (this.state.fanautospeed == 'force') {
-      fanLevel = 'auto';
+  _valueOfFanForTasmota(fanSpeed, fanSteps, fanAutoSpeed) {
+    if (fanAutoSpeed == 'low') {
+      return String(Math.floor((fanSteps + 1) * fanSpeed / 101) || 'auto');
+    } else if (fanAutoSpeed == 'force') {
+      return 'auto';
+    } else {
+      return String(Math.floor(fanSteps * fanSpeed / 101) + 1);
     }
-    return fanLevel;
   }
 }
 

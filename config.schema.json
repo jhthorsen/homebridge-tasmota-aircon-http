@@ -112,9 +112,9 @@
         "required": true,
         "default": "disabled",
         "oneOf": [
-          {"title":"Disabled", "enum":["disabled"]},
-          {"title":"Set auto when fan is at low level", "enum":["low"]},
-          {"title":"Set auto whathever fan speed", "enum":["force"]}
+          {"title":"Never set fans speed to auto", "enum":["disabled"]},
+          {"title":"Set auto speed when fan slider is at lower levels", "enum":["low"]},
+          {"title":"Set auto speed whathever fan slider position", "enum":["force"]}
         ]
       }
     }
