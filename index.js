@@ -1,5 +1,8 @@
+const CronJob = require('cron').CronJob;
 const debounce = require('debounce');
+const path = require('path');
 const pkg = require('./package.json');
+const storage = require('node-persist');
 const superagent = require('superagent');
 
 /**
@@ -25,7 +28,6 @@ class HomeBridgeTasmotaAirconHTTP {
     this.superagent = superagent; // TODO: Is superagent needed?
 
     this.fanSteps = config.fanSteps || 5; // Used to translate {0..100} to {1..fanSteps}
-    this.state = this._initialState(config);
     this.tasmotaBaseUrl = config.tasmota_url || config.tasmota_uri ||new URL('http://192.168.50.4/');
 
     // api.hap does not exist if called from "npm run cmd"
@@ -35,7 +37,14 @@ class HomeBridgeTasmotaAirconHTTP {
       this.switchTurboService = this._setupSwitchTurboService(api.hap);
       this.switchEconoService = this._setupSwitchEconoService(api.hap);
       this.switchQuietService = this._setupSwitchQuietService(api.hap);
+
+      //Get Previous state from storage
+      storage.initSync({'dir': path.join(api.user.storagePath(), 'HomeBridgeTasmotaAirconHTTP')});
+      this.state = storage.getItemSync(this.name) || this._initialState(config);
     }
+
+    //Get Temperature from tasmota task
+    this.getTemperatureFromTasmota();
   }
 
   /**
@@ -49,6 +58,23 @@ class HomeBridgeTasmotaAirconHTTP {
     if (this.state.quietswitch) services.push(this.switchQuietService);
     if (this.state.turboswitch) services.push(this.switchTurboService);
     return services ;
+  }
+
+  getTemperatureFromTasmota() {
+    const url = new URL(this.tasmotaBaseUrl.toString());
+    url.pathname = '/cm';
+    url.searchParams.set('cmnd', 'GlobalTemp');
+    //Run the task of getting temperature form tasmota every 2 minutes
+    var jobGetTemp = new CronJob('*/2 * * * *', function() {
+      superagent.get(url.toString())
+      .then(res => {
+        this.log.debug(res.body);
+        this.state.currentTemperature = res.body.GlobalTemp;
+      })
+      .catch(err => {
+        this.log.error(err);
+      });
+    },null,true,null,this,true);
   }
 
   /**
@@ -85,6 +111,7 @@ class HomeBridgeTasmotaAirconHTTP {
     this.log.info('Set ' + JSON.stringify(params));
     Object.keys(params).forEach(k => (this.state[k] = params[k]));
     this.sendStateToTasmotaLater();
+    storage.setItem(this.name,this.state);
   }
 
   _characteristicActive({Characteristic}, val) {
@@ -105,7 +132,8 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   _characteristicCurrentTemperature(...args) {
-    return this._characteristicCoolingThresholdTemperature(...args);
+    //If there is no temp sensors on tasmota, this will return 0
+    return this.state.currentTemperature || this.state.temperature;
   }
 
   _characteristicHeatingThresholdTemperature(...args) {
@@ -197,6 +225,9 @@ class HomeBridgeTasmotaAirconHTTP {
       swingVertical: false,
       temperature: 20,
       temperatureUnit: config.temperature_unit || 'C', // C or F
+
+      //Get from Device
+      currentTemperature: 0,
     };
   }
 

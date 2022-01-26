@@ -28,7 +28,9 @@
     "test": "tap --no-coverage test/*.js"
   },
   "dependencies": {
+    "cron": "^1.8.2",
     "debounce": "^1.2.1",
+    "node-persist": "^2.1.0",
     "superagent": "^6.1.0"
   },
   "devDependencies": {
