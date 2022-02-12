@@ -48,7 +48,7 @@ class HomeBridgeTasmotaAirconHTTP {
     if (this.state.econoswitch) services.push(this.switchEconoService);
     if (this.state.quietswitch) services.push(this.switchQuietService);
     if (this.state.turboswitch) services.push(this.switchTurboService);
-    return services ;
+    return services;
   }
 
   /**
@@ -125,33 +125,39 @@ class HomeBridgeTasmotaAirconHTTP {
   _characteristicSwitchEconoOn({Characteristic}, val) {
     if (arguments.length == 2 && !val) {
       this.set({econo: false});
-    } else if (arguments.length == 2 && val) {
+    }
+    else if (arguments.length == 2 && val) {
       this.set({econo: true, quiet: false, turbo: false});
       this.switchQuietService.updateCharacteristic(Characteristic.On, false);
       this.switchTurboService.updateCharacteristic(Characteristic.On, false);
     }
+
     return this.state.econo;
   }
 
   _characteristicSwitchQuietOn({Characteristic}, val) {
     if (arguments.length == 2 && !val) {
       this.set({quiet: false});
-    } else if (arguments.length == 2 && val) {
+    }
+    else if (arguments.length == 2 && val) {
       this.set({econo: false, quiet: true, turbo: false});
       this.switchEconoService.updateCharacteristic(Characteristic.On, false);
       this.switchTurboService.updateCharacteristic(Characteristic.On, false);
     }
+
     return this.state.quiet;
   }
 
   _characteristicSwitchTurboOn({Characteristic}, val) {
     if (arguments.length == 2 && !val) {
       this.set({turbo: false});
-    } else if (arguments.length == 2 && val) {
+    }
+    else if (arguments.length == 2 && val) {
       this.set({econo: false, quiet: false, turbo: true});
       this.switchEconoService.updateCharacteristic(Characteristic.On, false);
       this.switchQuietService.updateCharacteristic(Characteristic.On, false);
     }
+
     return this.state.turbo;
   }
 
@@ -234,7 +240,7 @@ class HomeBridgeTasmotaAirconHTTP {
 
   _setupSwitchEconoService({Characteristic, Service}) {
     const service = new Service.Switch('Econo', 'econo');
-    const method = '_characteristicSwitchEconoOn' ;
+    const method = '_characteristicSwitchEconoOn';
     const characteristic = service.getCharacteristic(Characteristic['On']);
     characteristic.onGet(() => this[method]({Characteristic}));
     characteristic.onSet(val => this[method]({Characteristic}, val));
