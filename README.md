@@ -62,3 +62,7 @@ aircon with another infrared remote, then the settings will not be updated in Ho
 ## Author
 
 Jan Henning Thorsen
+
+## Contributors
+
+Jean-Laurent Girod

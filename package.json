@@ -5,7 +5,26 @@
   "homepage": "https://github.com/jhthorsen/homebridge-tasmota-aircon-http#readme",
   "license": "MIT",
   "author": "Jan Henning Thorsen",
-  "contributors": [],
+  "contributors": [
+    {
+      "name": "Jan Henning Thorsen",
+      "email": "jhthorsen@cpan.org",
+      "url": "https://github.com/jhthorsen",
+      "contributions": 16,
+      "additions": 11294,
+      "deletions": 1142,
+      "hireable": null
+    },
+    {
+      "name": "Jean-Laurent Girod",
+      "email": "jeanlaurent.girod@icloud.com",
+      "url": "https://github.com/macjl",
+      "contributions": 1,
+      "additions": 87,
+      "deletions": 2,
+      "hireable": null
+    }
+  ],
   "main": "index.js",
   "engines": {
     "node": ">=12.22.1",
