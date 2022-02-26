@@ -189,6 +189,7 @@ class HomeBridgeTasmotaAirconHTTP {
       // Editable from Homebridge Plugin Settings GUI
       beep: config.beep || false,
       econoswitch: config.econoswitch || false,
+      fanAutoSpeed: config.fanautospeed || 'disabled',
       light: config.light || false,
       name: config.name || 'DAIKIN',
       quietswitch: config.quietswitch || false,
@@ -275,7 +276,7 @@ class HomeBridgeTasmotaAirconHTTP {
       Celsius: normalizeOnOff(state.temperatureUnit != 'F'),
       Clean: normalizeOnOff(state.clean),
       Econo: normalizeOnOff(state.econo),
-      FanSpeed: String(Math.ceil(this.fanSteps * state.fanSpeed / 100) || 1), // Should never be zero, because it would mean "Off"
+      FanSpeed: this._valueOfFanForTasmota(),
       Filter: normalizeOnOff(state.filter),
       Light: normalizeOnOff(state.light),
       Mode: ucfirst(state.mode),
@@ -290,6 +291,16 @@ class HomeBridgeTasmotaAirconHTTP {
       Vendor: state.vendor,
     };
   }
+
+  _valueOfFanForTasmota() {
+   if (this.state.fanAutoSpeed == 'low') {
+     return String(Math.floor((this.fanSteps + 1) * this.state.fanSpeed / 101) || 'auto');
+   } else if (this.state.fanAutoSpeed == 'force') {
+     return 'auto';
+   } else {
+     return String(Math.floor(this.fanSteps * this.state.fanSpeed / 101) + 1);
+   }
+ }
 }
 
 module.exports = (api) => {
