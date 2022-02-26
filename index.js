@@ -1,5 +1,7 @@
 const debounce = require('debounce');
+const path = require('path');
 const pkg = require('./package.json');
+const storage = require('node-persist');
 const superagent = require('superagent');
 
 /**
@@ -25,7 +27,11 @@ class HomeBridgeTasmotaAirconHTTP {
     this.superagent = superagent; // TODO: Is superagent needed?
 
     this.fanSteps = config.fanSteps || 5; // Used to translate {0..100} to {1..fanSteps}
-    this.state = this._initialState(config);
+
+    // If exists, get Previous state from storage
+    if (api.user) storage.initSync({'dir': path.join(api.user.storagePath(), 'HomeBridgeTasmotaAirconHTTP')});
+    this.state = storage.getItemSync(this.name) || this._initialState(config);
+
     this.tasmotaBaseUrl = config.tasmota_url || config.tasmota_uri ||new URL('http://192.168.50.4/');
 
     // api.hap does not exist if called from "npm run cmd"
@@ -85,6 +91,7 @@ class HomeBridgeTasmotaAirconHTTP {
     this.log.info('Set ' + JSON.stringify(params));
     Object.keys(params).forEach(k => (this.state[k] = params[k]));
     this.sendStateToTasmotaLater();
+    storage.setItem(this.name, this.state);
   }
 
   _characteristicActive({Characteristic}, val) {
