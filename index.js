@@ -27,12 +27,13 @@ class HomeBridgeTasmotaAirconHTTP {
     this.superagent = superagent; // TODO: Is superagent needed?
 
     this.fanSteps = config.fanSteps || 5; // Used to translate {0..100} to {1..fanSteps}
+    this.state = this._initialState(config);
+    this.tasmotaBaseUrl = config.tasmota_url || config.tasmota_uri ||new URL('http://192.168.50.4/');
 
     // If exists, get Previous state from storage
     if (api.user) storage.initSync({'dir': path.join(api.user.storagePath(), 'HomeBridgeTasmotaAirconHTTP')});
-    this.state = storage.getItemSync(this.name) || this._initialState(config);
-
-    this.tasmotaBaseUrl = config.tasmota_url || config.tasmota_uri ||new URL('http://192.168.50.4/');
+    const persistedState = storage.getItemSync(this.name) || {};
+    Object.keys(persistedState).forEach(k => (this.state[k] = persistedState[k]));
 
     // api.hap does not exist if called from "npm run cmd"
     if (api.hap) {
