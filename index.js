@@ -38,7 +38,7 @@ class HomeBridgeTasmotaAirconHTTP {
     }
 
     // Get Temperature from tasmota task
-    this._getTemperatureFromTasmota();
+    this._getTemperatureFromTasmotaTask();
   }
 
   /**
@@ -179,24 +179,23 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   _getTemperatureFromTasmota() {
-     const url = new URL(this.tasmotaBaseUrl.toString());
-     url.pathname = '/cm';
-     url.searchParams.set('cmnd', 'GlobalTemp');
-     // Run the task once at start
-     this._getTemperatureFromTasmotaTask(url);
-     // Then run the task of getting temperature form tasmota every 2 minutes
-     setInterval(() => this._getTemperatureFromTasmotaTask(url), 2 * 60 * 1000);
-    }
+    const url = new URL(this.tasmotaBaseUrl.toString());
+    url.pathname = '/cm';
+    url.searchParams.set('cmnd', 'GlobalTemp');
 
-  _getTemperatureFromTasmotaTask(url) {
-    superagent.get(url.toString())
-     .then(res => {
-       this.log.debug(res.body);
-       this.state.currentTemperature = res.body.GlobalTemp;
-     })
-     .catch(err => {
-       this.log.error(err);
-     });
+    return superagent.get(url.toString()).then(res => {
+      this.log.debug(res.body);
+      this.state.currentTemperature = res.body.GlobalTemp;
+    }).catch(err => {
+      this.log.error(err);
+    });
+  }
+
+  _getTemperatureFromTasmotaTask() {
+    // Run the function that get the temperature from tasmota every 2 minutes
+    this._getTemperatureFromTasmota().finally(() => {
+      setTimeout(() => this._getTemperatureFromTasmotaTask(), 2 * 60 * 1000);
+    });
   }
 
   _initialState(config) {
