@@ -294,13 +294,13 @@ class HomeBridgeTasmotaAirconHTTP {
 
   _valueOfFanForTasmota() {
    if (this.state.fanAutoSpeed == 'low') {
-     return String(Math.floor((this.fanSteps + 1) * this.state.fanSpeed / 101) || 'auto');
+     return String((Math.ceil((this.fanSteps + 1) * this.state.fanSpeed / 100) - 1 ) || 'auto');
    }
    else if (this.state.fanAutoSpeed == 'force') {
      return 'auto';
    }
    else {
-     return String(Math.floor(this.fanSteps * this.state.fanSpeed / 101) + 1);
+     return String(Math.ceil(this.fanSteps * this.state.fanSpeed / 100) || 1);
    }
  }
 }
