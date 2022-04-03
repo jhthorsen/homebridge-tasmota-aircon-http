@@ -18,6 +18,7 @@ class HomeBridgeTasmotaAirconHTTP {
    * @param {Homebrige} api A homebridge object
    */
   constructor(log = console, config = {}, api = {}) {
+    this.api = api;
     this.name = config.name || 'HomeBridgeTasmotaAirconHTTP';
     this.identity = '';
     this.log = log;
@@ -186,6 +187,11 @@ class HomeBridgeTasmotaAirconHTTP {
     return superagent.get(url.toString()).then(res => {
       this.log.debug(res.body);
       this.state.currentTemperature = res.body.GlobalTemp;
+      // If temperature is correctly obtained from Tasmota, notify Homekit of the new value
+      if (this.state.currentTemperature) {
+        this.heaterCoolerService.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature)
+          .updateValue(this.state.currentTemperature);
+      }
     }).catch(err => {
       this.log.error(err);
     });
