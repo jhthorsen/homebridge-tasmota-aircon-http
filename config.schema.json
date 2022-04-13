@@ -104,6 +104,17 @@
         "title": "Enable Turbo Switch Homekit service",
         "type": "boolean",
         "default": false
+      },
+      "fanautospeed": {
+        "title": "Enable the auto speed for Fan",
+        "type": "string",
+        "required": true,
+        "default": "disabled",
+        "oneOf": [
+          {"title":"Never set fan speed to auto", "enum":["disabled"]},
+          {"title":"Set auto speed when fan slider is at lower levels", "enum":["low"]},
+          {"title":"Always set the fan speed to auto. The fan slider in Home will have no effect", "enum":["force"]}
+        ]
       }
     }
   }

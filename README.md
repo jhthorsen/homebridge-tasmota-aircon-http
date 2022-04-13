@@ -46,6 +46,7 @@ format, meaning very little configuration is needed. Here are the parameters sen
 * Remote control / Aircon vendor (```vendor```) - The vendor. Ex Daikon, Hitacho, Toshiba, ...
 * Beep (```beep```) - Enable "beep" in the HVAC IR code.
 * Light (```light```) - Enable "light" in the HVAC IR code.
+* Enable the auto speed for Fan (```fanautospeed```) - Set if the plugin should use the speed _auto_ of fan
 
 ## Caveats
 
