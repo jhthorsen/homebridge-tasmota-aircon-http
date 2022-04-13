@@ -20,6 +20,7 @@ class HomeBridgeTasmotaAirconHTTP {
    * @param {Homebrige} api A homebridge object
    */
   constructor(log = console, config = {}, api = {}) {
+    this.api = api;
     this.name = config.name || 'HomeBridgeTasmotaAirconHTTP';
     this.identity = '';
     this.log = log;
@@ -43,6 +44,9 @@ class HomeBridgeTasmotaAirconHTTP {
       this.switchEconoService = this._setupSwitchEconoService(api.hap);
       this.switchQuietService = this._setupSwitchQuietService(api.hap);
     }
+
+    // Get Temperature from tasmota task
+    this._getTemperatureFromTasmotaTask();
   }
 
   /**
@@ -113,7 +117,8 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   _characteristicCurrentTemperature(...args) {
-    return this._characteristicCoolingThresholdTemperature(...args);
+    // If there is no temp sensors on tasmota, this will return 0
+    return this.state.currentTemperature || this.state.temperature;
   }
 
   _characteristicHeatingThresholdTemperature(...args) {
@@ -182,6 +187,31 @@ class HomeBridgeTasmotaAirconHTTP {
     return Characteristic.TargetHeaterCoolerState[state];
   }
 
+  _getTemperatureFromTasmota() {
+    const url = new URL(this.tasmotaBaseUrl.toString());
+    url.pathname = '/cm';
+    url.searchParams.set('cmnd', 'GlobalTemp');
+
+    return superagent.get(url.toString()).then(res => {
+      this.log.debug(res.body);
+      this.state.currentTemperature = res.body.GlobalTemp;
+      // If temperature is correctly obtained from Tasmota, notify Homekit of the new value
+      if (this.state.currentTemperature) {
+        this.heaterCoolerService.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature)
+          .updateValue(this.state.currentTemperature);
+      }
+    }).catch(err => {
+      this.log.error(err);
+    });
+  }
+
+  _getTemperatureFromTasmotaTask() {
+    // Run the function that get the temperature from tasmota every 2 minutes
+    this._getTemperatureFromTasmota().finally(() => {
+      setTimeout(() => this._getTemperatureFromTasmotaTask(), 2 * 60 * 1000);
+    });
+  }
+
   _initialState(config) {
     return {
       // Static (for now)
@@ -211,6 +241,9 @@ class HomeBridgeTasmotaAirconHTTP {
       swingVertical: false,
       temperature: 20,
       temperatureUnit: config.temperature_unit || 'C', // C or F
+
+      // Get from Device
+      currentTemperature: 0,
     };
   }
 
