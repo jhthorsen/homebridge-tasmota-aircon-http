@@ -327,7 +327,8 @@ class HomeBridgeTasmotaAirconHTTP {
 
   _valueOfFanForTasmota() {
    if (this.state.fanAutoSpeed == 'low') {
-     return String((Math.ceil((this.fanSteps + 1) * this.state.fanSpeed / 100) - 1 ) || 'auto');
+     const speed = Math.ceil((this.fanSteps + 1) * this.state.fanSpeed / 100) - 1;
+     return String(speed > 0 ? speed : 'auto');
    }
    else if (this.state.fanAutoSpeed == 'force') {
      return 'auto';

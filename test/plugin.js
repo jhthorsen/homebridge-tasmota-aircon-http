@@ -29,6 +29,7 @@ t.test('basics', t => {
       clean: false,
       econo: false,
       econoswitch: false,
+      fanAutoSpeed: 'disabled',
       fanSpeed: 50,
       filter: false,
       light: false,
