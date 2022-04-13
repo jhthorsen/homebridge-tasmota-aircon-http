@@ -44,7 +44,7 @@
   },
   "scripts": {
     "cmd": "node ./script/tasmota-aircon-http.js",
-    "test": "tap test/*.js"
+    "test": "tap"
   },
   "dependencies": {
     "debounce": "^1.2.1",
