@@ -27,6 +27,7 @@ t.test('basics', t => {
     t.same(p.state, {
       beep: false,
       clean: false,
+      currentTemperature: 0,
       econo: false,
       econoswitch: false,
       fanAutoSpeed: 'disabled',

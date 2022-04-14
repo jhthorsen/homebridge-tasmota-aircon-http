@@ -19,7 +19,6 @@ class HomeBridgeTasmotaAirconHTTP {
    * @param {Homebrige} api A homebridge object
    */
   constructor(log = console, config = {}, api = {}) {
-    this.api = api;
     this.name = config.name || 'HomeBridgeTasmotaAirconHTTP';
     this.identity = '';
     this.log = log;
@@ -39,7 +38,7 @@ class HomeBridgeTasmotaAirconHTTP {
       this.switchQuietService = this._setupSwitchQuietService(api.hap);
     }
 
-    this._getTemperatureFromTasmotaTask();
+    if (api.hap && config.temp_from_tasmota) this._getTemperatureFromTasmotaTask(api, config.temp_from_tasmota);
   }
 
   /**
@@ -179,29 +178,30 @@ class HomeBridgeTasmotaAirconHTTP {
     return Characteristic.TargetHeaterCoolerState[state];
   }
 
-  _getTemperatureFromTasmota() {
+  _getTemperatureFromTasmota(api) {
     const url = new URL(this.tasmotaBaseUrl.toString());
     url.pathname = '/cm';
     url.searchParams.set('cmnd', 'GlobalTemp');
 
-    return superagent.get(url.toString()).then(res => {
-      this.log.debug(res.body);
+    return this.superagent.get(url.toString()).then(res => {
       this.state.currentTemperature = res.body.GlobalTemp;
+
       // If temperature is correctly obtained from Tasmota, notify Homekit of the new value
       if (this.state.currentTemperature) {
-        this.heaterCoolerService.getCharacteristic(this.api.hap.Characteristic.CurrentTemperature)
+        this.heaterCoolerService.getCharacteristic(api.hap.Characteristic.CurrentTemperature)
           .updateValue(this.state.currentTemperature);
       }
-    }).catch(err => {
-      this.log.error(err);
     });
   }
 
-  _getTemperatureFromTasmotaTask() {
-    // Run the function that get the temperature from tasmota every 2 minutes
-    this._getTemperatureFromTasmota().finally(() => {
-      setTimeout(() => this._getTemperatureFromTasmotaTask(), 2 * 60 * 1000);
-    });
+  _getTemperatureFromTasmotaTask(api, interval) {
+    let lastErr = '';
+    this.getTemperatureFromTasmotaTid = setInterval(() => {
+      this._getTemperatureFromTasmota(api).catch(err => {
+        err = String(err);
+        if (err != lastErr) this.log.error(err);
+      });
+    }, interval * 1000);
   }
 
   _initialState(config) {

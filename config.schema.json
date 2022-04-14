@@ -115,6 +115,11 @@
           {"title":"Set auto speed when fan slider is at lower levels", "enum":["low"]},
           {"title":"Always set the fan speed to auto. The fan slider in Home will have no effect", "enum":["force"]}
         ]
+      },
+      "temp_from_tasmota": {
+        "title": "Get globalTemp from the Tasmota device every x second",
+        "type": "integer",
+        "default": 120
       }
     }
   }
