@@ -67,3 +67,16 @@ Jan Henning Thorsen
 ## Contributors
 
 Jean-Laurent Girod
+
+## Changes
+
+* 2022.1.0
+  * Add an option to use the 'auto' fan speed #8 - Jean-Laurent Girod
+  * Can fetch current temperatur from the tasmota device #9 - Jean-Laurent Girod
+* 2021.2.0
+  * Add switches for Quiet, Turbo and Eco mode #2 - Jean-Laurent Girod
+* 2021.1.0
+  * Started the project
+  * Add heaterCoolerService
+  * Add GUI config parameters
+  * Add command line script
