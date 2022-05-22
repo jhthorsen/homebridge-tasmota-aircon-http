@@ -1,6 +1,7 @@
 const debounce = require('debounce');
 const path = require('path');
 const pkg = require('./package.json');
+const storage = require('node-persist');
 const superagent = require('superagent');
 
 /**
@@ -29,6 +30,9 @@ class HomeBridgeTasmotaAirconHTTP {
     this.state = this._initialState(config);
     this.tasmotaBaseUrl = config.tasmota_url || config.tasmota_uri || new URL('http://192.168.50.4/');
 
+    // If exists, get Previous state from storage
+    this.loadStorage(api);
+
     // api.hap does not exist if called from "npm run cmd"
     if (api.hap) {
       this.heaterCoolerService = this._setupHeaterCoolorService(api.hap);
@@ -52,6 +56,12 @@ class HomeBridgeTasmotaAirconHTTP {
     if (this.state.quietswitch) services.push(this.switchQuietService);
     if (this.state.turboswitch) services.push(this.switchTurboService);
     return services;
+  }
+
+  async loadStorage(api) {
+    if (api.user) await storage.init({'dir': path.join(api.user.storagePath(), 'HomeBridgeTasmotaAirconHTTP')});
+    const persistedState = await storage.getItem(this.name) || {};
+    Object.keys(persistedState).forEach(k => (this.state[k] = persistedState[k]));
   }
 
   /**
@@ -88,6 +98,7 @@ class HomeBridgeTasmotaAirconHTTP {
     this.log.info('Set ' + JSON.stringify(params));
     Object.keys(params).forEach(k => (this.state[k] = params[k]));
     this.sendStateToTasmotaLater();
+    storage.setItem(this.name, this.state);
   }
 
   _characteristicActive({Characteristic}, val) {
