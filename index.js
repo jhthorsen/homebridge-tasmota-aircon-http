@@ -59,11 +59,12 @@ class HomeBridgeTasmotaAirconHTTP {
   }
 
   async loadStorage(api) {
-    const storagePath = 'HomeBridgeTasmotaAirconHTTP';
+    let storagePath = 'HomeBridgeTasmotaAirconHTTP';
     if (api.user) storagePath = path.join(api.user.storagePath(), storagePath);
     await storage.init({'dir': storagePath});
     const persistedState = await storage.getItem(this.name) || {};
     Object.keys(persistedState).forEach(k => (this.state[k] = persistedState[k]));
+    this._storageReady = true;
   }
 
   /**
@@ -100,7 +101,7 @@ class HomeBridgeTasmotaAirconHTTP {
     this.log.info('Set ' + JSON.stringify(params));
     Object.keys(params).forEach(k => (this.state[k] = params[k]));
     this.sendStateToTasmotaLater();
-    storage.setItem(this.name, this.state);
+    if (this._storageReady) storage.setItem(this.name, this.state);
   }
 
   _characteristicActive({Characteristic}, val) {
